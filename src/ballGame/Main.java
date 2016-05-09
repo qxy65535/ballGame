@@ -12,6 +12,7 @@ public class Main {
 		setting.setLocationRelativeTo(ballGameFrame);
 		setting.setVisible(true);
 		
+		//System.out.println("2");
 		ballGameFrame.startGame();
 		
 		System.out.println(ballGameFrame.getContentPane().getWidth());

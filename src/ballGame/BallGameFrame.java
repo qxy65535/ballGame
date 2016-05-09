@@ -32,6 +32,7 @@ public class BallGameFrame extends JFrame{
 	private int mouseY;
 	private int titleHeight;
 	private int left;
+	
 
 	private MyTime time;
 	private Timer timer;
@@ -43,6 +44,7 @@ public class BallGameFrame extends JFrame{
 		super("弹了个球");
 		this.width = width;
 		this.height = height;
+		ballNum = 0;
 		g = getGraphics();
 
 		setSize(width, height);
@@ -51,7 +53,6 @@ public class BallGameFrame extends JFrame{
 		UIManager.put("Button.font",font); 
 		UIManager.put("Label.font",font); 
 		
-		time = new MyTime();
 		
 		addMouseMotionListener(new MouseMotionAdapter(){
 			public void mouseMoved(MouseEvent event){
@@ -76,6 +77,14 @@ public class BallGameFrame extends JFrame{
 		titleHeight = height - getContentPane().getHeight();
 		left = width - getContentPane().getWidth();
 		gameStart = true;
+		gameStopped = false;
+		gameOver = false;
+		time = new MyTime();
+		
+		//System.out.println("ballNum " + ballNum + "2");
+		
+		balls = new Ball[ballNum];
+		
         BufferedImage bf = new BufferedImage(40, 40, BufferedImage.TYPE_INT_BGR); //缓冲图片
         Graphics bg = bf.createGraphics();  //缓冲图片的graphics对象
         bg.setColor(Color.black);
@@ -83,7 +92,18 @@ public class BallGameFrame extends JFrame{
 		Cursor cursor = Toolkit.getDefaultToolkit().createCustomCursor(bf, new Point(0, 0), "norm");	
 
 		this.setCursor(cursor);
-
+		
+		if (balls == null){
+			balls = new Ball[ballNum];
+		}
+		
+		ExecutorService executorService = Executors.newCachedThreadPool();
+		for (int i = 0; i < ballNum; ++i){
+			balls[i] = new Ball(width, height);
+			executorService.execute(new BallThread(balls[i])); 
+		}
+		executorService.shutdown();
+		
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
 			public void run() {				
@@ -91,9 +111,15 @@ public class BallGameFrame extends JFrame{
 				repaint();
 				
 				if (gameOver && !gameStopped){
-					JOptionPane.showMessageDialog(BallGameFrame.this, "游戏结束！您存活了" + time.getTime());
 					gameStopped = true;
 					this.cancel();
+					if (JOptionPane.showConfirmDialog(BallGameFrame.this, "游戏结束！您存活了" 
+				        + time.getTime() + "再来一局？", "游戏结束", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
+						startGame();
+					}
+					//JOptionPane.showMessageDialog(BallGameFrame.this, "游戏结束！您存活了" + time.getTime());
+//					gameStopped = true;
+//					this.cancel();
 					
 				}
 				
@@ -115,23 +141,25 @@ public class BallGameFrame extends JFrame{
 		}
 
        //使用bg对象绘制所有图像，也就是代替原来的g
-		if (balls == null){
-			Random r = new Random();
-			balls = new Ball[ballNum];
-			ExecutorService executorService = Executors.newCachedThreadPool();
-			for (int i = 0; i < ballNum; ++i){
-				balls[i] = new Ball(width, height, r.nextInt(8)+5, r.nextInt(8)+5);
-				executorService.execute(new BallThread(balls[i])); 
-			}
-			executorService.shutdown();
-		}
+//		if (balls == null){
+//			balls = new Ball[ballNum];
+//			ExecutorService executorService = Executors.newCachedThreadPool();
+//			for (int i = 0; i < ballNum; ++i){
+//				balls[i] = new Ball(width, height);
+//				executorService.execute(new BallThread(balls[i])); 
+//			}
+//			executorService.shutdown();
+//		}
+		
 		for (int i = 0; i < ballNum; ++i){
-			balls[i].paint(bg);
+			if (balls[i] != null)
+				balls[i].paint(bg);
 		}
 		bg.setFont(new Font("宋体", Font.PLAIN, 30));
 		bg.setColor(Color.black);
 		bg.drawString(time.getTime(), 100, 100);
         g.drawImage(bf, 0, 0, null); //只需绘制bf一张即可，不会有闪烁现象
+        
 
         
 //		Random r = new Random();
@@ -172,6 +200,7 @@ public class BallGameFrame extends JFrame{
 	}
 	
 	public void setBallNum(int num){
+		//System.out.println("ballNum " + ballNum + "1");
 		ballNum = num;
 	}
 	

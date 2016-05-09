@@ -10,13 +10,14 @@ public class Ball {
 	private int ballSpeedX, ballSpeedY;
 	private Color color;
 	private int width, height;
+	private final int[] roll = {1, -1};
 
 	
-	public Ball(int width, int height, int ballSpeedX, int ballSpeedY){
+	public Ball(int width, int height){
 		this.width = width;
 		this.height = height;
-		this.ballSpeedX = ballSpeedX;
-		this.ballSpeedY = ballSpeedY;
+		this.ballSpeedX = rollSpeed();
+		this.ballSpeedY = rollSpeed();
 		
 		Random random = new Random();
 		x = random.nextInt(width);
@@ -41,6 +42,11 @@ public class Ball {
 	public void paint(Graphics g){
 		g.setColor(color);
 		g.fillOval(x, y, RADIUS, RADIUS);
+	}
+	
+	private int rollSpeed(){
+		Random r = new Random();
+		return (r.nextInt(8)+5)*roll[r.nextInt(2)];
 	}
 	
 	public void ballMove(){
