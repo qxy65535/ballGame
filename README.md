@@ -5,7 +5,7 @@
 界面大概如下：
 
 小球数目设置：
-![](https://github.com/qxy65535/ballGame/blob/master/screenshoots/1.png)
+![](screenshoots/1.png)
 
 游戏界面：
 ![](https://github.com/qxy65535/ballGame/blob/master/screenshoots/2.png)
